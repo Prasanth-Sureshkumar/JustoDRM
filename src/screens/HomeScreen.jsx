@@ -12,10 +12,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import RealFileEpubReader from "../components/EnhancedRealFileEpubReader";
 import ScreenshotProtection from "../components/ScreenshotProtection";
-import { useAuth } from "../context/AuthContext";
 
 export default function HomeScreen({ navigation }) {
-  const { logout } = useAuth();
   const isDarkMode = useColorScheme() === "dark";
   const [currentMode, setCurrentMode] = useState("menu");
 
@@ -47,16 +45,6 @@ export default function HomeScreen({ navigation }) {
               Browse and read EPUB files from your device storage
             </Text>
           </TouchableOpacity>
-
-          <View style={{ marginTop: 20 }}>
-            <Button
-              title="Go to Profile"
-              onPress={() => navigation.navigate("Profile")}
-            />
-            <View style={{ marginTop: 10 }}>
-              <Button title="Logout" onPress={logout} color="red" />
-            </View>
-          </View>
         </View>
       </SafeAreaView>
     </ScreenshotProtection>
