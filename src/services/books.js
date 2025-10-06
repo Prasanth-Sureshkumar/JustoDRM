@@ -37,3 +37,16 @@ export const requestBookLicense = async (bookId, publicKey) => {
     throw new Error(message);
   }
 };
+
+export const fetchIndividualBook = async (BOOK_URL) => {
+  try {
+    const res = await api.get(BOOK_URL);
+    return res;
+  } catch (err) {
+    const message =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message
+    throw new Error(message);
+  }
+};

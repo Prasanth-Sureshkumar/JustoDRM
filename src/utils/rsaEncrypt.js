@@ -25,6 +25,8 @@ export async function generateRsaKeyPair(keySize = 2048) {
 export async function decryptWithPrivateKey(encryptedBase64, privateKey) {
     // Note: The `passphrase` is for key decryption (if the key file itself is encrypted), 
     // which is not a standard parameter for the main `decrypt` function in this library.
+    console.log(encryptedBase64, privateKey);
+    
     try {
         const decrypted = await RSA.decrypt(encryptedBase64, privateKey);
         // react-native-rsa-native returns the plaintext string directly

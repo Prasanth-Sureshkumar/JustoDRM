@@ -12,10 +12,14 @@ import {
 } from "react-native";
 import { decryptAES256GCM } from "../utils/decrypt";
 import { generateRsaKeyPair, decryptWithPrivateKey } from "../utils/rsaEncrypt"; 
-import { base64ToBytes, parseEpubContent  } from "../utils/epubParser";
-import { requestBookLicense } from "../services/books";
+import { parseEpubContent  } from "../utils/epubParser";
+import { base64ToBytes } from "../utils/decrypt.js";
+import { fetchIndividualBook, requestBookLicense } from "../services/books";
 import { WATERMARK_PRESETS } from "../utils/WatermarkUtils";
 import Watermark from "../components/Watermark";
+import { API_BASE_URL } from "@env";
+import { log } from "console";
+import { useNavigation } from "@react-navigation/native";
 
 
 const screenWidth = Dimensions.get("window").width;
@@ -26,37 +30,11 @@ export default function BookDetails({ route }) {
   const { book } = route.params;
   const [loading, setLoading] = useState(false);
   const [parsedBookContent, setParsedBookContent] = useState(null); 
+  const navigation = useNavigation();
 
-  const handleReadBook = async () => {
-    try {
-        setLoading(true);
-        const { publicKey, privateKey } = await generateRsaKeyPair();         
-        const licenseRes = await requestBookLicense(book.id, publicKey);
-        if (!licenseRes?.data?.encryptedKey) {
-          throw new Error("Failed to acquire license");
-        }
-        const hexKey = await decryptWithPrivateKey(licenseRes.data.decryptionKey, privateKey);
-      const res = await fetch(book.bookUrl);
-      if (!res.ok) throw new Error("Failed to fetch book");
-      const encryptedJson = await res.text();
-      const base64Data = decryptAES256GCM(encryptedJson, hexKey);
-      if (!base64Data) throw new Error("AES Decryption failed: received empty data.");
-
-              const epubBytes = base64ToBytes(base64Data);
-        const epubArrayBuffer = epubBytes.buffer;
-
-        // Parse the EPUB content using the custom utility
-        const content = await parseEpubContent(epubArrayBuffer);
-        
-        setParsedBookContent(content); 
-
-    } catch (err) {
-      console.error("Decryption failed:", err.message);
-      Alert.alert("Error", err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleReadBook =  () => {
+        navigation.navigate("BookReader", { book });
+    };
 
     if (parsedBookContent) {
     const { metadata, chapters } = parsedBookContent;

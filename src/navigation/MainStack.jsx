@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import BookDetails from "../screens/IndividualBook";
+import BookReader from "../screens/BookReader";
 import { Image, TouchableOpacity } from "react-native";
 
 const Stack = createNativeStackNavigator();
@@ -30,6 +31,7 @@ export default function MainStack() {
       />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="BookDetails" component={BookDetails} options={{ title: "Book Details" }} />
+      <Stack.Screen name="BookReader" component={BookReader} options={{ headerShown: true }} />
     </Stack.Navigator>
   );
 }
