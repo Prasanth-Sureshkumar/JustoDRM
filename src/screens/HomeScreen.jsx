@@ -10,8 +10,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
+
 import RealFileEpubReader from "../components/EnhancedRealFileEpubReader";
 import ScreenshotProtection from "../components/ScreenshotProtection";
+import BookList from "./ListAllBooks";
 
 export default function HomeScreen({ navigation }) {
   const isDarkMode = useColorScheme() === "dark";
@@ -29,7 +31,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScreenshotProtection>
       <SafeAreaView style={[styles.container, backgroundStyle]}>
-        <View style={styles.header}>
+        {/* <View style={styles.header}>
           <Text style={styles.title}>📚 EPUB Reader</Text>
           <Text style={styles.subtitle}>Read EPUB files from your device</Text>
         </View>
@@ -45,7 +47,8 @@ export default function HomeScreen({ navigation }) {
               Browse and read EPUB files from your device storage
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
+        <BookList navigation={navigation} />
       </SafeAreaView>
     </ScreenshotProtection>
   );
