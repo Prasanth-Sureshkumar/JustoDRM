@@ -68,33 +68,67 @@ export default function BookDetails({ route }) {
       </View>
     );
   }
+ return (
+        <ScrollView contentContainerStyle={styles.container}>
+            <Image source={{ uri: book.cover }} style={[styles.bookImage, { width: imageWidth, height: imageHeight }]} />
+            <Text style={styles.summaryTitle}>Book Name : <Text style={styles.bookName}>{book.name}</Text></Text>
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Image source={{ uri: book.cover }} style={[styles.bookImage, { width: imageWidth, height: imageHeight }]} />
-      <Text style={styles.summaryTitle}>Book Name</Text>
-      <Text style={styles.bookName}>{book.name}</Text>
-      <Text style={styles.summaryTitle}>Author Name</Text>
-      <Text style={styles.authorName}>{book.authorName}</Text>
-      <Text style={styles.summaryTitle}>Summary</Text>
-      <Text style={styles.summaryText}>{book.summary || "No summary available."}</Text>
+            <Text style={styles.summaryTitle}>Author Name : <Text style={styles.authorName}>{book.authorName}</Text>
+            </Text>
+            <Text style={styles.summaryTitle}>Summary</Text>
+            <Text style={styles.summaryText}>{book.summary || "No summary available."}</Text>
 
-      <TouchableOpacity style={styles.readButton} onPress={handleReadBook}>
-        <Text style={styles.readButtonText}>Read Book</Text>
-      </TouchableOpacity>
-
-      {loading && <ActivityIndicator size="large" color="#4B0082" style={{ marginTop: 16 }} />}
-    </ScrollView>
-  );
+            <TouchableOpacity style={styles.readButton} onPress={handleReadBook}>
+                <Text style={styles.readButtonText}>Read Book</Text>
+            </TouchableOpacity>
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, alignItems: "center", backgroundColor: "#fff" },
-  bookImage: { borderRadius: 8, marginBottom: 16 },
-  bookName: { fontSize: 16, marginBottom: 4, textAlign: "center" },
-  authorName: { fontSize: 16, color: "#555", marginBottom: 16, textAlign: "center" },
-  summaryTitle: { fontSize: 18, fontWeight: "bold", alignSelf: "center", marginBottom: 8 },
-  summaryText: { fontSize: 14, color: "#333", marginBottom: 24, textAlign: "justify" },
-  readButton: { backgroundColor: "#4B0082", paddingVertical: 12, paddingHorizontal: 32, borderRadius: 8 },
-  readButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+    container: {
+        padding: 16,
+        alignItems: "center",
+        backgroundColor: "#fff",
+    },
+    bookImage: {
+        borderRadius: 8,
+        marginBottom: 16,
+    },
+    bookName: {
+        fontSize: 16,
+        color: "#555",
+        marginBottom: 4,
+        alignSelf: "flex-start",
+
+    },
+    authorName: {
+        fontSize: 16,
+        color: "#555",
+        marginBottom: 16,
+        alignSelf: "flex-start",
+    },
+    summaryTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        alignSelf: "flex-start",
+        marginBottom: 8,
+    },
+    summaryText: {
+        fontSize: 14,
+        color: "#333",
+        marginBottom: 24,
+        textAlign: "justify",
+    },
+    readButton: {
+        backgroundColor: "#4B0082",
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 8,
+    },
+    readButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
 });
