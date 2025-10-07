@@ -155,65 +155,77 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeText}>×</Text>
+              <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Now Playing</Text>
             <View style={styles.placeholder} />
           </View>
 
-          {/* Album Art */}
+          {/* Album Art with Enhanced Design */}
           <View style={styles.albumArtContainer}>
-            <Image source={{ uri: audio.cover }} style={styles.albumArt} />
+            <View style={styles.albumArtShadow}>
+              <Image source={{ uri: audio.cover }} style={styles.albumArt} />
+              <View style={styles.albumArtOverlay}>
+                <View style={styles.glowEffect} />
+              </View>
+            </View>
+            <View style={styles.audioWaveform}>
+              <View style={[styles.waveBar, { height: 12 }]} />
+              <View style={[styles.waveBar, styles.waveBarActive, { height: 20 }]} />
+              <View style={[styles.waveBar, { height: 8 }]} />
+              <View style={[styles.waveBar, styles.waveBarActive, { height: 16 }]} />
+              <View style={[styles.waveBar, { height: 10 }]} />
+              <View style={[styles.waveBar, styles.waveBarActive, { height: 18 }]} />
+              <View style={[styles.waveBar, { height: 6 }]} />
+            </View>
           </View>
 
           {/* Track Info */}
           <View style={styles.trackInfo}>
-            <Text style={styles.trackTitle}>{audio.name}</Text>
+            <Text style={styles.trackTitle} numberOfLines={2}>
+              {audio.name}
+            </Text>
             <Text style={styles.artistName}>by {audio.authorName}</Text>
           </View>
 
-          {/* Progress Slider */}
-          <View style={styles.progressContainer}>
-            <Slider
-              style={styles.progressSlider}
-              value={currentTime}
-              minimumValue={0}
-              maximumValue={duration}
-              minimumTrackTintColor="#4B0082"
-              maximumTrackTintColor="#e5e7eb"
-              onSlidingComplete={seekToTime}
-            />
-            <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-              <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          {/* Progress Section */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressContainer}>
+              <Slider
+                style={styles.progressSlider}
+                value={currentTime}
+                minimumValue={0}
+                maximumValue={duration}
+                minimumTrackTintColor="#6366F1"
+                maximumTrackTintColor="#404040"
+                thumbStyle={styles.sliderThumb}
+                trackStyle={styles.sliderTrack}
+                onSlidingComplete={seekToTime}
+              />
+              <View style={styles.timeContainer}>
+                <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+                <View style={styles.progressDot} />
+                <Text style={styles.timeText}>{formatTime(duration)}</Text>
+              </View>
             </View>
           </View>
 
           {/* Controls */}
           <View style={styles.controlsContainer}>
-            <TouchableOpacity
-              style={styles.playPauseButton}
-              onPress={togglePlayPause}
-            >
-              <Text style={styles.playPauseIcon}>{isPlaying ? '⏸' : '▶'}</Text>
-            </TouchableOpacity>
+            <View style={styles.controlsBackground}>
+              <TouchableOpacity
+                style={[styles.playPauseButton, isPlaying && styles.playPauseButtonActive]}
+                onPress={togglePlayPause}
+              >
+                <View style={styles.playButtonInner}>
+                  <Text style={styles.playPauseIcon}>
+                    {isPlaying ? '⏸' : '▶'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
 
-          {/* Volume */}
-          <View style={styles.volumeContainer}>
-            <TouchableOpacity onPress={toggleMute} style={styles.muteButton}>
-              <Text style={styles.muteIcon}>{isMuted ? '🔇' : '🔊'}</Text>
-            </TouchableOpacity>
-            <Slider
-              style={styles.volumeSlider}
-              value={isMuted ? 0 : volume}
-              minimumValue={0}
-              maximumValue={1}
-              minimumTrackTintColor="#4B0082"
-              maximumTrackTintColor="#e5e7eb"
-              onValueChange={adjustVolume}
-            />
-          </View>
         </View>
       </View>
     </Modal>
@@ -223,78 +235,285 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: 'rgba(15, 23, 42, 0.85)',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   modalContainer: {
-    width: width * 0.9,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 20,
+    width: width * 0.85,
+    maxWidth: '90%',
+    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(100, 116, 139, 0.3)',
+    padding: 24,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.6,
+    shadowRadius: 25,
+    elevation: 30,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 16,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+    paddingBottom: 12,
   },
   closeButton: {
-    width: 30,
-    height: 30,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#2A2A2A',
+    borderWidth: 1,
+    borderColor: '#404040',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeText: { fontSize: 24, color: '#6b7280' },
-  headerTitle: { fontSize: 16, fontWeight: '600', color: '#1f2937' },
-  placeholder: { width: 30 },
-  albumArtContainer: { marginBottom: 20 },
-  albumArt: { width: 200, height: 200, borderRadius: 15 },
-  trackInfo: { alignItems: 'center', marginBottom: 30 },
-  trackTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    textAlign: 'center',
-    marginBottom: 5,
+  closeText: {
+    fontSize: 16,
+    color: '#E5E5E5',
+    fontWeight: '600',
   },
-  artistName: { fontSize: 16, color: '#6b7280', textAlign: 'center' },
-  progressContainer: { width: '100%', marginBottom: 30 },
-  progressSlider: { width: '100%', height: 40 },
+  headerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#F5F5F5',
+    letterSpacing: 0.5,
+  },
+  placeholder: { width: 28 },
+  albumArtContainer: {
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  albumArtShadow: {
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+    position: 'relative',
+  },
+  albumArt: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#404040',
+  },
+  albumArtOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  glowEffect: {
+    position: 'absolute',
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    borderRadius: 18,
+    opacity: 0.8,
+  },
+  audioWaveform: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    marginTop: 6,
+  },
+  waveBar: {
+    width: 2.5,
+    backgroundColor: '#555555',
+    borderRadius: 1.25,
+  },
+  waveBarActive: {
+    backgroundColor: '#6366F1',
+  },
+  trackInfo: {
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+    paddingBottom: 12,
+    width: '100%',
+  },
+  trackTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#F5F5F5',
+    textAlign: 'center',
+    marginBottom: 6,
+    lineHeight: 22,
+  },
+  artistName: {
+    fontSize: 14,
+    color: '#B0B0B0',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  progressSection: {
+    width: '100%',
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  progressContainer: {
+    width: '100%',
+  },
+  progressSlider: {
+    width: '100%',
+    height: 40,
+    marginVertical: 6,
+  },
+  sliderThumb: {
+    backgroundColor: '#6366F1',
+    width: 20,
+    height: 20,
+    borderWidth: 3,
+    borderColor: '#1A1A1A',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  sliderTrack: {
+    height: 4,
+    borderRadius: 2,
+  },
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 5,
-  },
-  timeText: { fontSize: 12, color: '#6b7280' },
-  controlsContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
+    paddingHorizontal: 8,
+    marginTop: 10,
+  },
+  timeText: {
+    fontSize: 13,
+    color: '#B0B0B0',
+    fontWeight: '600',
+    fontFamily: 'monospace',
+  },
+  progressDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: '#555555',
+  },
+  controlsContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  controlsBackground: {
+    padding: 6,
+    borderRadius: 32,
+    backgroundColor: '#2A2A2A',
+    borderWidth: 1,
+    borderColor: '#404040',
   },
   playPauseButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#4B0082',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#6366F1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#1A1A1A',
+    transform: [{ scale: 1 }],
+  },
+  playPauseButtonActive: {
+    backgroundColor: '#4F46E5',
+    transform: [{ scale: 0.96 }],
+  },
+  playButtonInner: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  playPauseIcon: { fontSize: 30, color: 'white' },
+  playPauseIcon: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: '700',
+    marginLeft: 2,
+  },
+  volumeSection: {
+    width: '100%',
+    paddingHorizontal: 8,
+  },
+  volumeLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
   volumeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
+    paddingHorizontal: 4,
+    paddingVertical: 8,
   },
   muteButton: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
   },
-  muteIcon: { fontSize: 20 },
-  volumeSlider: { flex: 1, height: 40 },
+  muteIcon: {
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  volumeSlider: {
+    flex: 1,
+    height: 40,
+    marginHorizontal: 8,
+  },
+  volumeSliderThumb: {
+    backgroundColor: '#6366F1',
+    width: 16,
+    height: 16,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  volumePercentage: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '600',
+    marginLeft: 8,
+    minWidth: 28,
+    textAlign: 'right',
+    fontFamily: 'monospace',
+  },
 });

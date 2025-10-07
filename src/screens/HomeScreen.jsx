@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import RealFileEpubReader from "../components/EnhancedRealFileEpubReader";
-import ScreenshotProtection from "../components/ScreenshotProtection";
+// import ScreenshotProtection from "../components/ScreenshotProtection";
 import BookListSection from "../components/BookListSection";
 import AudioListSection from "../components/AudioListSection";
 import AudioPlayerModal from "../components/AudioPlayerModal";
@@ -83,7 +83,6 @@ export default function HomeScreen({ navigation }) {
   }
 
   return (
-    <ScreenshotProtection>
       <SafeAreaView style={[styles.container, backgroundStyle]}>
         <ScrollView 
           style={styles.scrollView}
@@ -112,12 +111,11 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.loadingOverlay}>
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#4B0082" />
-              <Text style={styles.loadingText}>Decrypting audio...</Text>
+              <Text style={styles.loadingText}>Loading ...</Text>
             </View>
           </View>
         )}
       </SafeAreaView>
-    </ScreenshotProtection>
   );
 }
 

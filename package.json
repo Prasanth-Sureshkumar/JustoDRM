@@ -35,6 +35,7 @@
     "react-native-screens": "^4.16.0",
     "react-native-screenshot-prevent": "^1.2.1",
     "react-native-sound": "^0.12.0",
+    "react-native-toast-message": "^2.3.3",
     "react-native-webview": "^13.16.0",
     "text-encoding": "^0.7.0"
   },

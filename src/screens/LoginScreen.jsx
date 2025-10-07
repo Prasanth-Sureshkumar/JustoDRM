@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from "react-native";
+import { showSuccessToast, showErrorToast } from "../components/CustomToast";
 import { useAuth } from "../context/AuthContext";
 import DeviceInfo from 'react-native-device-info';
 
@@ -14,9 +15,9 @@ export default function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     try {
       await login({ username, password, deviceHash });
-      Alert.alert("Success", 'Logged in successfully');
+      showSuccessToast('Success', 'Logged in successfully');
     } catch (err) {
-      Alert.alert("Login failed", err.message);
+      showErrorToast('Login failed', err.message);
     }
   };
 
