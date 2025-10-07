@@ -1,7 +1,6 @@
 // import { decode as atob } from "base-64";
 // import { subtle } from 'react-native-quick-crypto';
 
-
 // function base64ToBytes(base64) {
 //   const binary = atob(base64);
 //   const bytes = new Uint8Array(binary.length);
@@ -26,7 +25,6 @@
 //   const ciphertext = base64ToBytes(encJson.content);
 
 // //   console.log("🔐 Starting AES Decryption", { iv, authTag });
-  
 
 //   const combined = new Uint8Array(ciphertext.length + authTag.length);
 //   combined.set(ciphertext);
@@ -43,7 +41,6 @@
 //   );
 
 // //   console.log("what comes here",combined);
-  
 
 // //   console.log("🔑 AES Key imported", cryptoKey);
 
@@ -54,14 +51,13 @@
 //   );
 
 //   console.log("✅ AES Decryption successful", decryptedBuffer);
-  
 
 //   return new TextDecoder().decode(decryptedBuffer);
 // }
 
-import { decode as atob } from "base-64";
-import { subtle } from "react-native-quick-crypto";
-import { TextDecoder } from "text-encoding";
+import { decode as atob } from 'base-64';
+import { subtle } from 'react-native-quick-crypto';
+import { TextDecoder } from 'text-encoding';
 
 /* small helper: Base64 -> Uint8Array */
 function base64ToBytes(base64) {
@@ -75,11 +71,11 @@ function base64ToBytes(base64) {
 
 /* small helper: hex preview (first N bytes) */
 function previewBytes(u8, n = 8) {
-  if (!u8) return "";
+  if (!u8) return '';
   const len = Math.min(u8.length, n);
-  let s = "";
-  for (let i = 0; i < len; i++) s += u8[i].toString(16).padStart(2, "0");
-  if (u8.length > n) s += "...";
+  let s = '';
+  for (let i = 0; i < len; i++) s += u8[i].toString(16).padStart(2, '0');
+  if (u8.length > n) s += '...';
   return s;
 }
 
@@ -100,27 +96,26 @@ function concatBuffers(buf1, buf2) {
 export async function decryptAES256GCM(encJson, base64Key) {
   try {
     if (!encJson?.iv || !encJson?.authTag || !encJson?.content)
-      throw new Error("Missing iv/authTag/content in JSON");
+      throw new Error('Missing iv/authTag/content in JSON');
 
     // decode
-    const iv = base64ToBytes(encJson.iv);           // Uint8Array
+    const iv = base64ToBytes(encJson.iv); // Uint8Array
     const authTag = base64ToBytes(encJson.authTag); // Uint8Array (usually 16)
     const ciphertext = base64ToBytes(encJson.content); // Uint8Array
-    const keyBytes = base64ToBytes(base64Key);      // Uint8Array (should be 32)
-
-    // quick sanity checks (log only lengths / small previews)
-    console.log("AES decrypt: keyLen, ivLen, tagLen, ctLen ->",
-      keyBytes.length, iv.length, authTag.length, ciphertext.length);
-    console.log("Preview: iv, tag, ct:", previewBytes(iv), previewBytes(authTag), previewBytes(ciphertext));
+    const keyBytes = base64ToBytes(base64Key); // Uint8Array (should be 32)
 
     if (keyBytes.length !== 32) {
-      throw new Error(`Invalid key length ${keyBytes.length}, expected 32 bytes (AES-256)`);
+      throw new Error(
+        `Invalid key length ${keyBytes.length}, expected 32 bytes (AES-256)`,
+      );
     }
     if (iv.length !== 12) {
-      console.warn(`Warning: iv length is ${iv.length}, recommended 12 bytes for GCM`);
+      console.warn(
+        `Warning: iv length is ${iv.length}, recommended 12 bytes for GCM`,
+      );
     }
     if (authTag.length === 0) {
-      throw new Error("Auth tag length is 0");
+      throw new Error('Auth tag length is 0');
     }
 
     // Combine ciphertext + authTag if your implementation expects appended tag.
@@ -130,45 +125,40 @@ export async function decryptAES256GCM(encJson, base64Key) {
 
     // importKey needs ArrayBuffer or TypedArray — pass ArrayBuffer for consistency
     const cryptoKey = await subtle.importKey(
-      "raw",
+      'raw',
       keyBytes.buffer,
-      { name: "AES-GCM" },
+      { name: 'AES-GCM' },
       false,
-      ["decrypt"]
+      ['decrypt'],
     );
 
     // decrypt: pass iv, and set tagLength in bits (authTag.length * 8)
     const decryptedBuffer = await subtle.decrypt(
       {
-        name: "AES-GCM",
+        name: 'AES-GCM',
         iv: iv.buffer,
         tagLength: authTag.length * 8,
       },
       cryptoKey,
-      combinedBuffer
+      combinedBuffer,
     );
-
-    console.log(JSON.stringify(decryptedBuffer));
-    
 
     // const decoder = new TextDecoder();
     // const decryptedText = decoder.decode(decryptedBuffer);
-    
 
     // return decryptedText;
     const u8 = new Uint8Array(decryptedBuffer);
-    let binary = "";
+    let binary = '';
     const chunkSize = 0x8000; // 32k chunk to avoid stack overflow
     for (let i = 0; i < u8.length; i += chunkSize) {
-        const chunk = u8.subarray(i, i + chunkSize);
-        binary += String.fromCharCode.apply(null, chunk);
+      const chunk = u8.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
     }
     const base64 = btoa(binary);
-    console.log("Decryption successful, base64 length:", base64);
-    
-    return base64; 
+
+    return base64;
   } catch (err) {
-    console.error("Decryption failed:", err && err.message ? err.message : err);
+    console.error('Decryption failed:', err && err.message ? err.message : err);
     throw err;
   }
 }

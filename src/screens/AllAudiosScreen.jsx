@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,16 @@ import {
   Alert,
   ActivityIndicator,
   SafeAreaView,
-} from "react-native";
-import { fetchAllAudios } from "../services/audios";
-import AudioPlayerModal from "../components/AudioPlayerModal";
+} from 'react-native';
+import {
+  fetchAllAudios,
+  fetchIndividualAudio,
+  requestAudioLicense,
+} from '../services/audios';
+import { generateRsaKeyPair } from '../utils/rsaEncrypt';
+import AudioPlayerModal from '../components/AudioPlayerModal';
+import { decryptAES256GCM } from '../utils/decrypt';
+import RNFS from 'react-native-fs';
 
 export default function AllAudiosScreen() {
   const [audios, setAudios] = useState([]);
@@ -29,16 +36,49 @@ export default function AllAudiosScreen() {
       const data = await fetchAllAudios();
       setAudios(data);
     } catch (err) {
-      console.error("Error fetching audios:", err.message);
-      Alert.alert("Error", err.message);
+      console.error('Error fetching audios:', err.message);
+      Alert.alert('Error', err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAudioPress = (audio) => {
-    setSelectedAudio(audio);
-    setModalVisible(true);
+  const handleAudioPress = async audio => {
+    setLoading(true);
+    try {
+      const rsaKeys = await generateRsaKeyPair();
+
+      const licenseRes = await requestAudioLicense(audio.id);
+      const individualAudioResponse = await fetchIndividualAudio(audio.id);
+
+      const decryptedBase64Audio = await decryptAES256GCM(
+        individualAudioResponse.data,
+        licenseRes?.payload?.decryptionKey,
+      );
+
+      const filePath = `${
+        RNFS.CachesDirectoryPath
+      }/decrypted_${Date.now()}.mp3`;
+      await RNFS.writeFile(filePath, decryptedBase64Audio, 'base64');
+
+      const audioUrl =
+        Platform.OS === 'android' ? filePath : `file://${filePath}`;
+
+      const completeAudioData = {
+        ...audio,
+        decryptionKey: licenseRes?.payload?.decryptionKey,
+        rsaPrivateKey: rsaKeys.private,
+        audioUrl,
+      };
+
+      setSelectedAudio(completeAudioData);
+      setModalVisible(true);
+    } catch (err) {
+      console.error('Error fetching individual audio:', err.message);
+      Alert.alert('Error', `Failed to load audio: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeModal = () => {
@@ -47,7 +87,10 @@ export default function AllAudiosScreen() {
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.audioItem} onPress={() => handleAudioPress(item)}>
+    <TouchableOpacity
+      style={styles.audioItem}
+      onPress={() => handleAudioPress(item)}
+    >
       <View style={styles.audioImageContainer}>
         <Image source={{ uri: item.cover }} style={styles.audioImage} />
         <View style={styles.playIcon}>
@@ -57,9 +100,11 @@ export default function AllAudiosScreen() {
       <View style={styles.audioInfo}>
         <Text style={styles.audioName}>{item.name}</Text>
         <Text style={styles.authorName}>by {item.authorName}</Text>
-        <Text style={styles.duration}>{item.duration || "Unknown duration"}</Text>
+        <Text style={styles.duration}>
+          {item.duration || 'Unknown duration'}
+        </Text>
         <Text style={styles.audioDescription} numberOfLines={2}>
-          {item.description || "No description available"}
+          {item.description || 'No description available'}
         </Text>
       </View>
     </TouchableOpacity>
@@ -67,7 +112,12 @@ export default function AllAudiosScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: 'center', alignItems: 'center' },
+        ]}
+      >
         <ActivityIndicator size="large" color="#4B0082" />
         <Text style={styles.loadingText}>Loading audio books...</Text>
       </SafeAreaView>
@@ -78,7 +128,7 @@ export default function AllAudiosScreen() {
     <SafeAreaView style={styles.container}>
       <FlatList
         data={audios}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
@@ -95,26 +145,26 @@ export default function AllAudiosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   listContainer: {
     padding: 16,
   },
   audioItem: {
-    flexDirection: "row",
+    flexDirection: 'row',
     padding: 12,
     borderRadius: 8,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
     marginBottom: 12,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
   audioImageContainer: {
-    position: "relative",
+    position: 'relative',
     marginRight: 12,
   },
   audioImage: {
@@ -123,19 +173,19 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   playIcon: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
     transform: [{ translateX: -12 }, { translateY: -12 }],
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "rgba(75, 0, 130, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(75, 0, 130, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   playIconText: {
-    color: "white",
+    color: 'white',
     fontSize: 10,
     marginLeft: 1,
   },
@@ -144,28 +194,28 @@ const styles = StyleSheet.create({
   },
   audioName: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#1f2937",
+    fontWeight: 'bold',
+    color: '#1f2937',
     marginBottom: 4,
   },
   authorName: {
     fontSize: 14,
-    color: "#6b7280",
+    color: '#6b7280',
     marginBottom: 2,
   },
   duration: {
     fontSize: 12,
-    color: "#9ca3af",
+    color: '#9ca3af',
     marginBottom: 4,
   },
   audioDescription: {
     fontSize: 12,
-    color: "#9ca3af",
+    color: '#9ca3af',
     lineHeight: 16,
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#6b7280",
+    color: '#6b7280',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -7,11 +7,13 @@ import {
   StyleSheet,
   Image,
   Dimensions,
-} from "react-native";
-import Slider from "@react-native-community/slider";
-// import Sound from "react-native-sound"; // Uncomment when package is installed
+  Alert,
+  Platform,
+} from 'react-native';
+import Slider from '@react-native-community/slider';
+import Sound from 'react-native-sound';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 
 export default function AudioPlayerModal({ visible, audio, onClose }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -20,109 +22,123 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
   const [volume, setVolume] = useState(1.0);
   const [isMuted, setIsMuted] = useState(false);
   const soundRef = useRef(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (visible && audio) {
-      // Initialize audio when modal opens
-      // initializeAudio();
+    if (visible && audio?.audioUrl) {
+      initializeAudio(audio.audioUrl);
     }
+
     return () => {
-      // Clean up audio when modal closes
       if (soundRef.current) {
-        // soundRef.current.stop();
-        // soundRef.current.release();
+        soundRef.current.stop();
+        soundRef.current.release();
       }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
     };
   }, [visible, audio]);
 
-  const initializeAudio = () => {
-    // Uncomment when react-native-sound is installed
-    /*
+  const initializeAudio = audioUri => {
+    if (!audioUri) return;
+
     Sound.setCategory('Playback');
-    
-    soundRef.current = new Sound(audio.audioUrl, '', (error) => {
+    const path =
+      Platform.OS === 'android' ? audioUri.replace('file://', '') : audioUri;
+
+    soundRef.current = new Sound(path, '', error => {
       if (error) {
-        console.log('Failed to load the sound', error);
+        console.error('Failed to load sound', error);
+        Alert.alert('Error', 'Failed to load audio file');
         return;
       }
       setDuration(soundRef.current.getDuration());
     });
-    */
+  };
+
+  const startTimeTracking = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      if (soundRef.current) {
+        soundRef.current.getCurrentTime(seconds => {
+          setCurrentTime(seconds);
+        });
+      }
+    }, 1000);
+  };
+
+  const stopTimeTracking = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
   };
 
   const togglePlayPause = () => {
-    if (isPlaying) {
-      pauseAudio();
-    } else {
-      playAudio();
-    }
-  };
+    if (!soundRef.current) return;
 
-  const playAudio = () => {
-    // Uncomment when react-native-sound is installed
-    /*
-    if (soundRef.current) {
-      soundRef.current.play((success) => {
-        if (success) {
-          console.log('Successfully finished playing');
-        } else {
-          console.log('Playback failed due to audio decoding errors');
+    if (isPlaying) {
+      soundRef.current.pause();
+      stopTimeTracking();
+      setIsPlaying(false);
+    } else {
+      soundRef.current.play(success => {
+        if (!success) {
+          console.log('Playback error');
+          stopTimeTracking();
         }
         setIsPlaying(false);
+        stopTimeTracking();
       });
+      startTimeTracking();
       setIsPlaying(true);
     }
-    */
-    setIsPlaying(true); // Temporary for UI demo
   };
 
-  const pauseAudio = () => {
-    // Uncomment when react-native-sound is installed
-    /*
-    if (soundRef.current) {
-      soundRef.current.pause();
-    }
-    */
-    setIsPlaying(false);
-  };
-
-  const seekToTime = (time) => {
-    // Uncomment when react-native-sound is installed
-    /*
+  const seekToTime = time => {
     if (soundRef.current) {
       soundRef.current.setCurrentTime(time);
+      setCurrentTime(time);
     }
-    */
-    setCurrentTime(time);
   };
+
+  // Clean up when modal closes
+  useEffect(() => {
+    if (!visible) {
+      stopTimeTracking();
+      if (soundRef.current) {
+        soundRef.current.stop();
+      }
+      setIsPlaying(false);
+      setCurrentTime(0);
+    }
+  }, [visible]);
 
   const toggleMute = () => {
-    const newMutedState = !isMuted;
-    setIsMuted(newMutedState);
-    // Uncomment when react-native-sound is installed
-    /*
+    setIsMuted(!isMuted);
     if (soundRef.current) {
-      soundRef.current.setVolume(newMutedState ? 0 : volume);
+      soundRef.current.setVolume(isMuted ? volume : 0);
     }
-    */
   };
 
-  const adjustVolume = (newVolume) => {
+  const adjustVolume = newVolume => {
     setVolume(newVolume);
-    if (!isMuted) {
-      // Uncomment when react-native-sound is installed
-      /*
-      if (soundRef.current) {
-        soundRef.current.setVolume(newVolume);
-      }
-      */
+    if (soundRef.current && !isMuted) {
+      soundRef.current.setVolume(newVolume);
     }
   };
 
-  const formatTime = (time) => {
+  const formatTime = time => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   if (!audio) return null;
@@ -131,7 +147,7 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
     <Modal
       visible={visible}
       animationType="slide"
-      transparent={true}
+      transparent
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
@@ -156,48 +172,37 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
             <Text style={styles.artistName}>by {audio.authorName}</Text>
           </View>
 
-          {/* Progress Bar */}
+          {/* Progress Slider */}
           <View style={styles.progressContainer}>
             <Slider
               style={styles.progressSlider}
               value={currentTime}
               minimumValue={0}
-              maximumValue={duration || 100} // Default to 100 for demo
+              maximumValue={duration}
               minimumTrackTintColor="#4B0082"
               maximumTrackTintColor="#e5e7eb"
-              thumbStyle={styles.sliderThumb}
               onSlidingComplete={seekToTime}
             />
             <View style={styles.timeContainer}>
               <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-              <Text style={styles.timeText}>{formatTime(duration || 180)}</Text>
+              <Text style={styles.timeText}>{formatTime(duration)}</Text>
             </View>
           </View>
 
           {/* Controls */}
           <View style={styles.controlsContainer}>
-            <TouchableOpacity style={styles.controlButton}>
-              <Text style={styles.controlIcon}>⏮</Text>
-            </TouchableOpacity>
-            
             <TouchableOpacity
               style={styles.playPauseButton}
               onPress={togglePlayPause}
             >
-              <Text style={styles.playPauseIcon}>
-                {isPlaying ? "⏸" : "▶"}
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.controlButton}>
-              <Text style={styles.controlIcon}>⏭</Text>
+              <Text style={styles.playPauseIcon}>{isPlaying ? '⏸' : '▶'}</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Volume Control */}
+          {/* Volume */}
           <View style={styles.volumeContainer}>
             <TouchableOpacity onPress={toggleMute} style={styles.muteButton}>
-              <Text style={styles.muteIcon}>{isMuted ? "🔇" : "🔊"}</Text>
+              <Text style={styles.muteIcon}>{isMuted ? '🔇' : '🔊'}</Text>
             </TouchableOpacity>
             <Slider
               style={styles.volumeSlider}
@@ -218,140 +223,78 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
     width: width * 0.9,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 20,
     padding: 20,
-    alignItems: "center",
+    alignItems: 'center',
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
     marginBottom: 20,
   },
   closeButton: {
     width: 30,
     height: 30,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  closeText: {
-    fontSize: 24,
-    color: "#6b7280",
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1f2937",
-  },
-  placeholder: {
-    width: 30,
-  },
-  albumArtContainer: {
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  albumArt: {
-    width: 200,
-    height: 200,
-    borderRadius: 15,
-  },
-  trackInfo: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
+  closeText: { fontSize: 24, color: '#6b7280' },
+  headerTitle: { fontSize: 16, fontWeight: '600', color: '#1f2937' },
+  placeholder: { width: 30 },
+  albumArtContainer: { marginBottom: 20 },
+  albumArt: { width: 200, height: 200, borderRadius: 15 },
+  trackInfo: { alignItems: 'center', marginBottom: 30 },
   trackTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#1f2937",
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#1f2937',
+    textAlign: 'center',
     marginBottom: 5,
   },
-  artistName: {
-    fontSize: 16,
-    color: "#6b7280",
-    textAlign: "center",
-  },
-  progressContainer: {
-    width: "100%",
-    marginBottom: 30,
-  },
-  progressSlider: {
-    width: "100%",
-    height: 40,
-  },
-  sliderThumb: {
-    backgroundColor: "#4B0082",
-    width: 15,
-    height: 15,
-  },
+  artistName: { fontSize: 16, color: '#6b7280', textAlign: 'center' },
+  progressContainer: { width: '100%', marginBottom: 30 },
+  progressSlider: { width: '100%', height: 40 },
   timeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     paddingHorizontal: 5,
   },
-  timeText: {
-    fontSize: 12,
-    color: "#6b7280",
-  },
+  timeText: { fontSize: 12, color: '#6b7280' },
   controlsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 30,
-  },
-  controlButton: {
-    width: 50,
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 15,
-  },
-  controlIcon: {
-    fontSize: 24,
-    color: "#6b7280",
   },
   playPauseButton: {
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: "#4B0082",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 15,
+    backgroundColor: '#4B0082',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  playPauseIcon: {
-    fontSize: 30,
-    color: "white",
-    marginLeft: 2,
-  },
+  playPauseIcon: { fontSize: 30, color: 'white' },
   volumeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
   },
   muteButton: {
     width: 40,
     height: 40,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  muteIcon: {
-    fontSize: 20,
-  },
-  volumeSlider: {
-    flex: 1,
-    height: 40,
-  },
+  muteIcon: { fontSize: 20 },
+  volumeSlider: { flex: 1, height: 40 },
 });

@@ -1,17 +1,7 @@
-import { GET_ALL_AUDIOS } from "../constants/apiUrls";
+import { GET_ALL_AUDIOS, AQUIRE_LICENSE } from "../constants/apiUrls";
 import api from "../http/axiosInstance";
-import { fetchAllAudiosMock } from "./mockAudios";
 
 export const fetchAllAudios = async () => {
-  // Use mock data for now - replace with actual API call when ready
-  try {
-    return await fetchAllAudiosMock();
-  } catch (err) {
-    throw new Error('Failed to fetch audios');
-  }
-  
-  // Uncomment below when actual API is ready
-  /*
   try {
     const res = await api.get(GET_ALL_AUDIOS);
     if (res && res.data) {
@@ -25,12 +15,32 @@ export const fetchAllAudios = async () => {
       'Failed to fetch audios';
     throw new Error(message);
   }
-  */
 };
 
-export const fetchIndividualAudio = async (AUDIO_URL) => {
+export const requestAudioLicense = async (audioId, publicKey) => {
   try {
-    const res = await api.get(AUDIO_URL);
+    const payload = {
+      bookId: audioId,
+      publicKey: publicKey,
+    };
+    const res = await api.post(AQUIRE_LICENSE, payload);
+    if (res && res.data) {
+      return res.data;
+    } 
+  } catch (err) {
+    const message =
+      err?.response?.data?.message ||
+      err?.response?.data?.error ||
+      err?.message ||
+      'Audio license request failed';
+    console.error("Audio License Request Error:", err); 
+    throw new Error(message);
+  }
+};
+
+export const fetchIndividualAudio = async (audioId) => {
+  try {
+    const res = await api.get(`${GET_ALL_AUDIOS}/${audioId}`);
     return res;
   } catch (err) {
     const message =
