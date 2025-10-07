@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -22,6 +23,8 @@ import { fetchIndividualAudio, requestAudioLicense } from "../services/audios";
 import { generateRsaKeyPair } from "../utils/rsaEncrypt";
 import { decryptAES256GCM } from "../utils/decrypt";
 import RNFS from "react-native-fs";
+import { decryptConcatenatedAES256GCM } from "../utils/decryptText";
+import { ENCRYPTION_KEY } from "@env";
 
 export default function HomeScreen({ navigation }) {
   const isDarkMode = useColorScheme() === "dark";
@@ -38,14 +41,14 @@ export default function HomeScreen({ navigation }) {
   const handleAudioPress = async (audio) => {
     setAudioLoading(true);
     try {
-      const rsaKeys = await generateRsaKeyPair();
-
       const licenseRes = await requestAudioLicense(audio.id);
       const individualAudioResponse = await fetchIndividualAudio(audio.id);
-
+      const keyFromLicense = licenseRes?.payload?.decryptionKey;
+      const decryptedKey = await decryptConcatenatedAES256GCM(keyFromLicense, ENCRYPTION_KEY);
+      
       const decryptedBase64Audio = await decryptAES256GCM(
         individualAudioResponse.data,
-        licenseRes?.payload?.decryptionKey,
+        decryptedKey,
       );
 
       const filePath = `${
@@ -58,8 +61,6 @@ export default function HomeScreen({ navigation }) {
 
       const completeAudioData = {
         ...audio,
-        decryptionKey: licenseRes?.payload?.decryptionKey,
-        rsaPrivateKey: rsaKeys.private,
         audioUrl,
       };
 
@@ -89,7 +90,10 @@ export default function HomeScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>📚 Digital Library</Text>
+            <View style={{flex : 1, flexDirection:'row', gap:10}}>
+              <Image source={require('../assets/Logo.png')} style={{width:40, height:40, backgroundColor:'black', borderRadius:10 }}/>
+            <Text style={styles.title}>Digital Library</Text>
+            </View>
             <Text style={styles.subtitle}>Discover books and audiobooks</Text>
           </View>
 
@@ -100,7 +104,6 @@ export default function HomeScreen({ navigation }) {
             onAudioPress={handleAudioPress}
           />
         </ScrollView>
-
         <AudioPlayerModal
           visible={audioModalVisible}
           audio={selectedAudio}

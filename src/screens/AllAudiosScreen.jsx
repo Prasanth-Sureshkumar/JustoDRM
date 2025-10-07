@@ -19,6 +19,8 @@ import { generateRsaKeyPair } from '../utils/rsaEncrypt';
 import AudioPlayerModal from '../components/AudioPlayerModal';
 import { decryptAES256GCM } from '../utils/decrypt';
 import RNFS from 'react-native-fs';
+import { decryptConcatenatedAES256GCM } from '../utils/decryptText';
+import { ENCRYPTION_KEY } from '@env';
 
 export default function AllAudiosScreen() {
   const [audios, setAudios] = useState([]);
@@ -46,14 +48,15 @@ export default function AllAudiosScreen() {
   const handleAudioPress = async audio => {
     setLoading(true);
     try {
-      const rsaKeys = await generateRsaKeyPair();
 
       const licenseRes = await requestAudioLicense(audio.id);
       const individualAudioResponse = await fetchIndividualAudio(audio.id);
-
+      const keyFromLicense = licenseRes?.payload?.decryptionKey;
+      const decryptedKey = await decryptConcatenatedAES256GCM(keyFromLicense, ENCRYPTION_KEY);
+      
       const decryptedBase64Audio = await decryptAES256GCM(
         individualAudioResponse.data,
-        licenseRes?.payload?.decryptionKey,
+        decryptedKey,
       );
 
       const filePath = `${
@@ -66,8 +69,6 @@ export default function AllAudiosScreen() {
 
       const completeAudioData = {
         ...audio,
-        decryptionKey: licenseRes?.payload?.decryptionKey,
-        rsaPrivateKey: rsaKeys.private,
         audioUrl,
       };
 

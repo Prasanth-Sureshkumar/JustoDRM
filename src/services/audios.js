@@ -21,7 +21,7 @@ export const requestAudioLicense = async (audioId, publicKey) => {
   try {
     const payload = {
       bookId: audioId,
-      publicKey: publicKey,
+      encType: "AES",
     };
     const res = await api.post(AQUIRE_LICENSE, payload);
     if (res && res.data) {

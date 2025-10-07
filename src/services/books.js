@@ -21,7 +21,7 @@ export const requestBookLicense = async (bookId, publicKey) => {
   try {
     const payload = {
       bookId: bookId,
-      publicKey: publicKey,
+      encType: "AES",
     };
     const res = await api.post(AQUIRE_LICENSE, payload);
     if (res && res.data) {
