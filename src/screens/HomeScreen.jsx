@@ -6,22 +6,35 @@ import {
   TouchableOpacity,
   useColorScheme,
   Button,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
-
 import RealFileEpubReader from "../components/EnhancedRealFileEpubReader";
 import ScreenshotProtection from "../components/ScreenshotProtection";
-import BookList from "./ListAllBooks";
+import BookListSection from "../components/BookListSection";
+import AudioListSection from "../components/AudioListSection";
+import AudioPlayerModal from "../components/AudioPlayerModal";
 
 export default function HomeScreen({ navigation }) {
   const isDarkMode = useColorScheme() === "dark";
   const [currentMode, setCurrentMode] = useState("menu");
+  const [selectedAudio, setSelectedAudio] = useState(null);
+  const [audioModalVisible, setAudioModalVisible] = useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? 'black' : 'white',
     flex: 1,
+  };
+
+  const handleAudioPress = (audio) => {
+    setSelectedAudio(audio);
+    setAudioModalVisible(true);
+  };
+
+  const closeAudioModal = () => {
+    setAudioModalVisible(false);
+    setSelectedAudio(null);
   };
 
   if (currentMode === "reader") {
@@ -31,36 +44,46 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScreenshotProtection>
       <SafeAreaView style={[styles.container, backgroundStyle]}>
-        {/* <View style={styles.header}>
-          <Text style={styles.title}>📚 EPUB Reader</Text>
-          <Text style={styles.subtitle}>Read EPUB files from your device</Text>
-        </View>
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>📚 Digital Library</Text>
+            <Text style={styles.subtitle}>Discover books and audiobooks</Text>
+          </View>
 
-        <View style={styles.menuContainer}>
-          <TouchableOpacity
-            style={styles.menuButton}
-            onPress={() => setCurrentMode("reader")}
-          >
-            <Text style={styles.menuButtonIcon}>📱</Text>
-            <Text style={styles.menuButtonTitle}>Select EPUB File</Text>
-            <Text style={styles.menuButtonDesc}>
-              Browse and read EPUB files from your device storage
-            </Text>
-          </TouchableOpacity>
-        </View> */}
-        <BookList navigation={navigation} />
+          <BookListSection navigation={navigation} maxItems={5} />
+          <AudioListSection 
+            navigation={navigation} 
+            maxItems={5} 
+            onAudioPress={handleAudioPress}
+          />
+        </ScrollView>
+
+        <AudioPlayerModal
+          visible={audioModalVisible}
+          audio={selectedAudio}
+          onClose={closeAudioModal}
+        />
       </SafeAreaView>
     </ScreenshotProtection>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { 
+    flex: 1 
+  },
+  scrollView: {
+    flex: 1,
+  },
   header: {
     padding: 20,
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+    marginBottom: 20,
   },
   title: {
     fontSize: 28,
@@ -68,28 +91,9 @@ const styles = StyleSheet.create({
     color: "#2c3e50",
     marginBottom: 8,
   },
-  subtitle: { fontSize: 16, color: "#7f8c8d", textAlign: "center" },
-  menuContainer: { flex: 1, padding: 20 },
-  menuButton: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 15,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
+  subtitle: { 
+    fontSize: 16, 
+    color: "#7f8c8d", 
+    textAlign: "center" 
   },
-  menuButtonIcon: { fontSize: 32, textAlign: "center", marginBottom: 8 },
-  menuButtonTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#2c3e50",
-    textAlign: "center",
-    marginBottom: 5,
-  },
-  menuButtonDesc: { fontSize: 14, color: "#7f8c8d", textAlign: "center", lineHeight: 20 },
 });
