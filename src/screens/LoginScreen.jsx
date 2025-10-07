@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator, TouchableOpacity, Image } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import DeviceInfo from 'react-native-device-info';
 
@@ -30,7 +30,9 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <View style={{alignSelf:'center', backgroundColor: '#010f29', width: 180,  height: 190, borderRadius : 20, marginBottom: 20 }}>
+      <Image source={require('../assets/Logo.png')} style={{width: 200, height: 220, alignSelf:'center', marginBottom:0}} />
+      </View>
       <TextInput
         style={styles.input}
         value={username}
@@ -45,7 +47,9 @@ export default function LoginScreen({ navigation }) {
         secureTextEntry
         onChangeText={setPassword}
       />
-      {loading ? <ActivityIndicator /> : <Button title="Login" onPress={handleLogin} />}
+      {loading ? <ActivityIndicator /> : <TouchableOpacity style={{width: 100, backgroundColor:'#010f29', alignSelf:'center', borderRadius: 20}} onPress={handleLogin} >
+        <Text style={{alignSelf:'center', padding : 10, color : 'white'}}> Login </Text>
+        </TouchableOpacity>}
     </View>
   );
 }
@@ -53,5 +57,5 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, justifyContent: "center" },
   title: { fontSize: 24, fontWeight: "600", marginBottom: 20, textAlign: "center" },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 12, marginBottom: 12, borderRadius: 8 },
+  input: { borderWidth: 1, borderColor: "#ccc", padding: 12, marginBottom: 20, borderRadius: 25 },
 });

@@ -6,7 +6,8 @@ import { generateRsaKeyPair } from "../utils/rsaEncrypt";
 import { fetchIndividualBook, requestBookLicense } from "../services/books";
 import { saveDecryptedEpub } from "../utils/saveFilesLocally";
 import { API_BASE_URL } from "@env";
-import EpubWebView from "./EpubReader";
+import WebViewEpubReader from "./EpubReader";
+
 
 
 export default function BookReader({ route }) {
@@ -29,7 +30,7 @@ export default function BookReader({ route }) {
 
         const decryptedBase64 = await decryptAES256GCM(encJson, base64Key);
         // const epubPath = await saveDecryptedEpub(decryptedBase64, book.id);
-        setBase64Epub(decryptedBase64); 
+        // setBase64Epub(decryptedBase64); 
         // console.log("Decrypted EPUB saved at:", epubPath);
         
 
@@ -63,33 +64,9 @@ export default function BookReader({ route }) {
     );
   }
 
-// const htmlContent = (fileUri) => `
-//     <!DOCTYPE html>
-//     <html>
-//     <head>
-//     <meta charset="utf-8">
-//     <script src="https://unpkg.com/epubjs/dist/epub.min.js"></script>
-//     <style>
-//         html, body { margin:0; padding:0; height:100%; }
-//         #viewer { width:100%; height:100%; }
-//     </style>
-//     </head>
-//     <body>
-//     <div id="viewer"></div>
-//     <script>
-//         const fileUrl = "file://${fileUri}";
-//         const book = ePub(fileUrl);
-//         const rendition = book.renderTo("viewer", { width:"100%", height:"100%" });
-//         rendition.display();
-//     </script>
-//     </body>
-//     </html>
-//     `;
-
-
   return (
-    <View style={{ flex: 1, padding:10, backgroundColor:'pink' }}>
-     <EpubWebView base64Epub={base64Epub} />
+    <View style={styles.container}>
+      <WebViewEpubReader base64Epub={base64Epub}/>
     </View>
   );
 }
@@ -100,5 +77,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+  },
+    container: {
+    flex: 1,
+  },
+  epub: {
+    flex: 1,
   },
 });

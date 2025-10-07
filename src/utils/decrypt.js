@@ -148,22 +148,25 @@ export async function decryptAES256GCM(encJson, base64Key) {
       combinedBuffer
     );
 
-    const decoder = new TextDecoder();
-    const decryptedText = decoder.decode(decryptedBuffer);
+    console.log(JSON.stringify(decryptedBuffer));
     
 
-    return decryptedText;
-    // const u8 = new Uint8Array(decryptedBuffer);
-    // let binary = "";
-    // const chunkSize = 0x8000; // 32k chunk to avoid stack overflow
-    // for (let i = 0; i < u8.length; i += chunkSize) {
-    //     const chunk = u8.subarray(i, i + chunkSize);
-    //     binary += String.fromCharCode.apply(null, chunk);
-    // }
-    // const base64 = btoa(binary);
-    // console.log("Decryption successful, base64 length:", base64);
+    // const decoder = new TextDecoder();
+    // const decryptedText = decoder.decode(decryptedBuffer);
     
-    // return base64; 
+
+    // return decryptedText;
+    const u8 = new Uint8Array(decryptedBuffer);
+    let binary = "";
+    const chunkSize = 0x8000; // 32k chunk to avoid stack overflow
+    for (let i = 0; i < u8.length; i += chunkSize) {
+        const chunk = u8.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, chunk);
+    }
+    const base64 = btoa(binary);
+    console.log("Decryption successful, base64 length:", base64);
+    
+    return base64; 
   } catch (err) {
     console.error("Decryption failed:", err && err.message ? err.message : err);
     throw err;

@@ -91,7 +91,7 @@ export default function BookDetails({ route }) {
 const styles = StyleSheet.create({
   container: { padding: 16, alignItems: "center", backgroundColor: "#fff" },
   bookImage: { borderRadius: 8, marginBottom: 16 },
-  bookName: { fontSize: 20, fontWeight: "bold", marginBottom: 4, textAlign: "center" },
+  bookName: { fontSize: 16, marginBottom: 4, textAlign: "center" },
   authorName: { fontSize: 16, color: "#555", marginBottom: 16, textAlign: "center" },
   summaryTitle: { fontSize: 18, fontWeight: "bold", alignSelf: "center", marginBottom: 8 },
   summaryText: { fontSize: 14, color: "#333", marginBottom: 24, textAlign: "justify" },

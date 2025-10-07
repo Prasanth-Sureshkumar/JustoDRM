@@ -5,7 +5,7 @@ import MainStack from "./MainStack";
 import { useAuth } from "../context/AuthContext";
 
 export default function AppNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, isLoggedIn } = useAuth();
   const [appLoading, setAppLoading] = useState(true);
 
   useEffect(() => {

@@ -40,6 +40,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getToken = async () => {
+    return await AsyncStorage.getItem("@auth_token");
+  };
+  
+  const isLoggedIn = async () => {
+    const token = await getToken();
+    return !!token;
+  };
+
   const logout = async () => {
     setUser(null);
     try {
@@ -50,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, isLoggedIn }}>
       {children}
     </AuthContext.Provider>
   );
