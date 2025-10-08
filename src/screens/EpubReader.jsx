@@ -123,9 +123,36 @@ const WebViewEpubReader = ({ base64Epub }) => {
         #nav-overlay {
             display: none !important;
         }
+        
+        * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        
+        body {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+        
+        img, iframe {
+            -webkit-user-drag: none !important;
+            -khtml-user-drag: none !important;
+            -moz-user-drag: none !important;
+            -o-user-drag: none !important;
+            user-drag: none !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;"
+      oncut="return false;" oncopy="return false;" onpaste="return false;"
+      ondrop="return false;" onkeydown="preventHotkeys(event)">
     <div id="nav-overlay">
         <div class="nav-section prev-section" onclick="navigatePrev()"></div>
         <div class="nav-section next-section" onclick="navigateNext()"></div>
@@ -149,6 +176,125 @@ const WebViewEpubReader = ({ base64Epub }) => {
         let spineItems = [];
         let currentSpineIndex = 0;
         const base64Epub = "${cleanedBase64}";
+        
+        function preventHotkeys(event) {
+            const blockedKeys = [
+                { key: 'c', ctrl: true }, // Ctrl+C
+                { key: 'a', ctrl: true }, // Ctrl+A
+                { key: 'x', ctrl: true }, // Ctrl+X
+                { key: 'v', ctrl: true }, // Ctrl+V
+                { key: 's', ctrl: true }, // Ctrl+S
+                { key: 'p', ctrl: true }, // Ctrl+P
+                { key: 'u', ctrl: true }, // Ctrl+U
+                { key: 'F12', ctrl: false },
+                { key: 'F3', ctrl: false },
+                { key: 'F5', ctrl: false },
+            ];
+            
+            const keyPressed = event.key.toLowerCase();
+            const isCtrlPressed = event.ctrlKey || event.metaKey;
+            
+            for (let blocked of blockedKeys) {
+                if (blocked.key.toLowerCase() === keyPressed && 
+                    blocked.ctrl === isCtrlPressed) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                }
+            }
+            
+            if (event.key.startsWith('F') && event.key.length > 1) {
+                event.preventDefault();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function disableDevTools() {
+            let devtools = {
+                open: false,
+                orientation: null
+            };
+            
+            const threshold = 160;
+            setInterval(() => {
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devtools.open) {
+                        devtools.open = true;
+                        console.clear();
+                        if (window.ReactNativeWebView) {
+                            window.ReactNativeWebView.postMessage(JSON.stringify({
+                                type: 'security_warning',
+                                message: 'Developer tools detected'
+                            }));
+                        }
+                    }
+                } else {
+                    devtools.open = false;
+                }
+            }, 500);
+        }
+        
+        function initCopyProtection() {
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('keyup', function(e) {
+                if (e.key === 'PrintScreen') {
+                    e.preventDefault();
+                    if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'security_warning',
+                            message: 'Screenshot attempt detected'
+                        }));
+                    }
+                }
+            });
+            
+            document.addEventListener('copy', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('cut', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            document.addEventListener('paste', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            setInterval(function() {
+                try {
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText('');
+                    }
+                } catch (e) {
+                    // Clipboard access denied
+                }
+            }, 1000);
+            
+            document.onselectstart = function() { return false; };
+            document.onmousedown = function() { return false; };
+            
+            disableDevTools();
+        }
 
         function showError(message) {
             console.error('EPUB Error:', message);
@@ -323,6 +469,11 @@ const WebViewEpubReader = ({ base64Epub }) => {
                                 visibility: visible !important;
                                 opacity: 1 !important;
                                 display: block !important;
+                                -webkit-user-select: none !important;
+                                -moz-user-select: none !important;
+                                -ms-user-select: none !important;
+                                user-select: none !important;
+                                -webkit-touch-callout: none !important;
                             }
                             body {
                                 background: white !important;
@@ -367,6 +518,22 @@ const WebViewEpubReader = ({ base64Epub }) => {
                             \`;
                             iframe.document.head.appendChild(style);
                         }
+                        
+                        // Apply copy protection to iframe content
+                        contents.document.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                        
+                        contents.document.addEventListener('selectstart', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                        
+                        contents.document.addEventListener('copy', function(e) {
+                            e.preventDefault();
+                            return false;
+                        });
                     });
                     
                     // Set up event listeners
@@ -459,6 +626,9 @@ const WebViewEpubReader = ({ base64Epub }) => {
         
         // Start immediately
         console.log('Starting EPUB loading process...');
+        
+        initCopyProtection();
+        
         waitForLibraries();
 
         // Send ready message to React Native
