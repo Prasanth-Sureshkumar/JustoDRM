@@ -6,14 +6,9 @@ import { useAuth } from "../context/AuthContext";
 import { ActivityIndicator, Text, View, StyleSheet } from "react-native";
 
 export default function AppNavigator() {
-  const { user, loading, isLoggedIn } = useAuth();
-  const [appLoading, setAppLoading] = useState(true);
+  const { user, loading, isLoggedIn, isInitializing } = useAuth();
 
-  useEffect(() => {
-    setAppLoading(false);
-  }, []);
-
-  if (loading || appLoading) {
+  if (loading || isInitializing) {
     return ( 
       <View style={styles.loaderContainer}>
         <Text style={styles.loadingText}>Initializing app, please wait...</Text>

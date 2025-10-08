@@ -108,30 +108,20 @@ const WebViewEpubReader = ({ base64Epub }) => {
             border: none !important;
         }
         
-        /* Navigation overlay */
+        /* Enable scrolling for continuous flow */
+        #viewer {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        
+        .epub-view {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+        }
+        
+        /* Remove navigation overlay for continuous scrolling */
         #nav-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .nav-section {
-            position: absolute;
-            height: 100%;
-            width: 50%;
-            top: 0;
-        }
-        
-        .prev-section {
-            left: 0;
-        }
-        
-        .next-section {
-            right: 0;
+            display: none !important;
         }
     </style>
 </head>
@@ -186,9 +176,6 @@ const WebViewEpubReader = ({ base64Epub }) => {
             document.getElementById('viewer').style.display = 'block';
             document.getElementById('error').style.display = 'none';
             
-            // Enable navigation overlay
-            document.getElementById('nav-overlay').style.display = 'block';
-            
             // Force background color
             document.body.style.backgroundColor = '#ffffff';
             document.body.style.background = '#ffffff';
@@ -200,16 +187,18 @@ const WebViewEpubReader = ({ base64Epub }) => {
         }
 
         function navigatePrev() {
-            if (book && rendition) {
-                rendition.prev();
-                setTimeout(updateNavigationInfo, 200);
+            // For continuous scrolling, scroll up by viewport height
+            const viewer = document.getElementById('viewer');
+            if (viewer) {
+                viewer.scrollTop -= window.innerHeight * 0.8;
             }
         }
 
         function navigateNext() {
-            if (book && rendition) {
-                rendition.next();
-                setTimeout(updateNavigationInfo, 200);
+            // For continuous scrolling, scroll down by viewport height
+            const viewer = document.getElementById('viewer');
+            if (viewer) {
+                viewer.scrollTop += window.innerHeight * 0.8;
             }
         }
 
@@ -315,13 +304,13 @@ const WebViewEpubReader = ({ base64Epub }) => {
                     
                     console.log('Spine items count:', spineItems.length);
                     
-                    // Render with continuous flow for better compatibility
+                    // Render with continuous vertical flow
                     rendition = book.renderTo("viewer", {
                         width: "100%",
                         height: "100%",
                         spread: "none",
-                        flow: "scrolled", // Use scrolled for better compatibility
-                        manager: "default"
+                        flow: "scrolled-continuous", // Continuous vertical scrolling
+                        manager: "continuous"
                     });
                     
                     // Apply custom styles to ensure content is visible
@@ -535,15 +524,10 @@ const WebViewEpubReader = ({ base64Epub }) => {
     if (webViewRef.current) {
       webViewRef.current.injectJavaScript(`
         console.log('Next button clicked');
-        if (window.rendition) {
-          window.rendition.next();
-          setTimeout(function() {
-            if (window.updateNavigationInfo) {
-              window.updateNavigationInfo();
-            }
-          }, 300);
+        if (window.navigateNext) {
+          window.navigateNext();
         } else {
-          console.log('Rendition not available');
+          console.log('Navigation function not available');
         }
       `);
     }
@@ -553,15 +537,10 @@ const WebViewEpubReader = ({ base64Epub }) => {
     if (webViewRef.current) {
       webViewRef.current.injectJavaScript(`
         console.log('Previous button clicked');
-        if (window.rendition) {
-          window.rendition.prev();
-          setTimeout(function() {
-            if (window.updateNavigationInfo) {
-              window.updateNavigationInfo();
-            }
-          }, 300);
+        if (window.navigatePrev) {
+          window.navigatePrev();
         } else {
-          console.log('Rendition not available');
+          console.log('Navigation function not available');
         }
       `);
     }
@@ -626,7 +605,6 @@ const WebViewEpubReader = ({ base64Epub }) => {
               </Text>
             )}
           </View>
-
         </View>
       )}
 

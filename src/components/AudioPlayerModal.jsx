@@ -19,8 +19,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1.0);
-  const [isMuted, setIsMuted] = useState(false);
   const soundRef = useRef(null);
   const intervalRef = useRef(null);
 
@@ -109,7 +107,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
     }
   };
 
-  // Clean up when modal closes
   useEffect(() => {
     if (!visible) {
       stopTimeTracking();
@@ -120,20 +117,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
       setCurrentTime(0);
     }
   }, [visible]);
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-    if (soundRef.current) {
-      soundRef.current.setVolume(isMuted ? volume : 0);
-    }
-  };
-
-  const adjustVolume = newVolume => {
-    setVolume(newVolume);
-    if (soundRef.current && !isMuted) {
-      soundRef.current.setVolume(newVolume);
-    }
-  };
 
   const formatTime = time => {
     const minutes = Math.floor(time / 60);
@@ -152,7 +135,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
     >
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeText}>✕</Text>
@@ -161,7 +143,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
             <View style={styles.placeholder} />
           </View>
 
-          {/* Album Art with Enhanced Design */}
           <View style={styles.albumArtContainer}>
             <View style={styles.albumArtShadow}>
               <Image source={{ uri: audio.cover }} style={styles.albumArt} />
@@ -180,7 +161,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
             </View>
           </View>
 
-          {/* Track Info */}
           <View style={styles.trackInfo}>
             <Text style={styles.trackTitle} numberOfLines={2}>
               {audio.name}
@@ -188,7 +168,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
             <Text style={styles.artistName}>by {audio.authorName}</Text>
           </View>
 
-          {/* Progress Section */}
           <View style={styles.progressSection}>
             <View style={styles.progressContainer}>
               <Slider
@@ -196,8 +175,8 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
                 value={currentTime}
                 minimumValue={0}
                 maximumValue={duration}
-                minimumTrackTintColor="#6366F1"
-                maximumTrackTintColor="#404040"
+                minimumTrackTintColor="#f6f6faff"
+                maximumTrackTintColor="#fffefeff"
                 thumbStyle={styles.sliderThumb}
                 trackStyle={styles.sliderTrack}
                 onSlidingComplete={seekToTime}
@@ -210,7 +189,6 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
             </View>
           </View>
 
-          {/* Controls */}
           <View style={styles.controlsContainer}>
             <View style={styles.controlsBackground}>
               <TouchableOpacity
@@ -235,7 +213,7 @@ export default function AudioPlayerModal({ visible, audio, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    backgroundColor: 'rgba(15, 23, 42, 0.67)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -243,7 +221,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: width * 0.85,
     maxWidth: '90%',
-    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+    backgroundColor: 'rgba(38, 46, 58, 0.95)',
     borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(100, 116, 139, 0.3)',
@@ -458,62 +436,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
     marginLeft: 2,
-  },
-  volumeSection: {
-    width: '100%',
-    paddingHorizontal: 8,
-  },
-  volumeLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  volumeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 4,
-    paddingVertical: 8,
-  },
-  muteButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  muteIcon: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  volumeSlider: {
-    flex: 1,
-    height: 40,
-    marginHorizontal: 8,
-  },
-  volumeSliderThumb: {
-    backgroundColor: '#6366F1',
-    width: 16,
-    height: 16,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  volumePercentage: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontWeight: '600',
-    marginLeft: 8,
-    minWidth: 28,
-    textAlign: 'right',
-    fontFamily: 'monospace',
   },
 });

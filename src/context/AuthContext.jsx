@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../http/axiosInstance";
 import { LOGIN_URL } from "../constants/apiUrls";
@@ -8,6 +8,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   const login = async (payload) => {
     setLoading(true);
@@ -58,8 +59,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("@auth_token");
+        if (token) {
+          setUser({ authenticated: true });
+        }
+      } catch (error) {
+        console.warn("Error initializing auth:", error);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isLoggedIn }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, isLoggedIn, isInitializing }}>
       {children}
     </AuthContext.Provider>
   );

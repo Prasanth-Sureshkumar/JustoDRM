@@ -23,7 +23,7 @@ export default function AudioListSection({ navigation, maxItems = 5, onAudioPres
     setLoading(true);
     try {
       const data = await fetchAllAudios();
-      setAudios(data.slice(0, maxItems)); // Show only first few items
+      setAudios(data.slice(0, maxItems));
     } catch (err) {
       console.error("Error fetching audios:", err.message);
       Alert.alert("Error", err.message);
@@ -51,7 +51,7 @@ export default function AudioListSection({ navigation, maxItems = 5, onAudioPres
       <View style={styles.audioInfo}>
         <Text style={styles.audioName} numberOfLines={2}>{item.name}</Text>
         <Text style={styles.authorName} numberOfLines={1}>by {item.authorName}</Text>
-        <Text style={styles.duration}>{item.duration || "Unknown"}</Text>
+        {/* <Text style={styles.duration}>{item.duration || "Unknown"}</Text> */}
       </View>
     </TouchableOpacity>
   );
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: 14,
-    color: "#4B0082",
+    color: "#010f29",
     fontWeight: "600",
   },
   loadingContainer: {
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "rgba(75, 0, 130, 0.8)",
+    backgroundColor: "#0d182bc7",
     justifyContent: "center",
     alignItems: "center",
   },

@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: 14,
-    color: "#4B0082",
+    color: "#010f29",
     fontWeight: "600",
   },
   loadingContainer: {

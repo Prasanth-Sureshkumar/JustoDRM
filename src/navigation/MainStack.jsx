@@ -20,32 +20,159 @@ export default function MainStack() {
         component={HomeScreen} 
         options={({ navigation }) => ({
           title: "Reading Room",
+          headerStyle: {
+            backgroundColor: "#1e293b",
+            elevation: 4,
+            shadowOpacity: 0.3,
+          },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: {
+            fontWeight: "600",
+            fontSize: 18,
+            color: "#ffffff",
+          },
+          headerShadowVisible: true,
           headerRight: () => (
             <>
             <TouchableOpacity
               // onPress={() => navigation.navigate("Profile")}
-              style={{ marginRight: 15 }}
+              style={{ 
+                marginRight: 15,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 3,
+              }}
             >
               <Image
                 source={{ uri: "https://picsum.photos/200" }}
-                style={{ width: 40, height: 40, borderRadius: 25,  }}
+                style={{ 
+                  width: 36, 
+                  height: 36, 
+                  borderRadius: 18,
+                  borderWidth: 2,
+                  borderColor: "#e2e8f0",
+                }}
               />
             </TouchableOpacity>
               <TouchableOpacity
                 onPress={logout} 
-                style={{ marginRight: 15 }}
+                style={{ 
+                  marginRight: 15,
+                  backgroundColor: "#010f29",
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "#334155",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
               >
-                <Text style={{ color: 'blue', fontSize: 16 }}>Logout</Text>
+                <Text style={{ 
+                  color: '#ffffff', 
+                  fontSize: 14,
+                  fontWeight: "500",
+                }}>Logout</Text>
               </TouchableOpacity>
             </>
           ),
         })}
       />
-      <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="BookDetails" component={BookDetails} options={{ title: "Book Details" }} />
-      <Stack.Screen name="BookReader" component={BookReader} options={{ title: "Book Reader" }} />
-      <Stack.Screen name="AllBooks" component={AllBooksScreen} options={{ title: "All Books" }} />
-      <Stack.Screen name="AllAudios" component={AllAudiosScreen} options={{ title: "Audio Books" }} />
+      <Stack.Screen 
+        name="Profile" 
+        component={ProfileScreen} 
+        options={{
+          title: "Profile",
+          headerStyle: { 
+            backgroundColor: "#1e293b",
+            elevation: 4,
+            shadowOpacity: 0.3,
+          },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: { 
+            fontWeight: "600",
+            color: "#ffffff",
+          },
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen 
+        name="BookDetails" 
+        component={BookDetails} 
+        options={{
+          title: "Book Details",
+          headerStyle: { 
+            backgroundColor: "#1e293b",
+            elevation: 4,
+            shadowOpacity: 0.3,
+          },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: { 
+            fontWeight: "600",
+            color: "#ffffff",
+          },
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen 
+        name="BookReader" 
+        component={BookReader} 
+        options={{
+          title: "Book Reader",
+          headerStyle: { 
+            backgroundColor: "#1e293b",
+            elevation: 4,
+            shadowOpacity: 0.3,
+          },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: { 
+            fontWeight: "600",
+            color: "#ffffff",
+          },
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen 
+        name="AllBooks" 
+        component={AllBooksScreen} 
+        options={{
+          title: "All Books",
+          headerStyle: { 
+            backgroundColor: "#1e293b",
+            elevation: 4,
+            shadowOpacity: 0.3,
+          },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: { 
+            fontWeight: "600",
+            color: "#ffffff",
+          },
+          headerShadowVisible: true,
+        }}
+      />
+      <Stack.Screen 
+        name="AllAudios" 
+        component={AllAudiosScreen} 
+        options={{
+          title: "Audio Books",
+          headerStyle: { 
+            backgroundColor: "#1e293b",
+            elevation: 4,
+            shadowOpacity: 0.3,
+          },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: { 
+            fontWeight: "600",
+            color: "#ffffff",
+          },
+          headerShadowVisible: true,
+        }}
+      />
     </Stack.Navigator>
   );
 }
