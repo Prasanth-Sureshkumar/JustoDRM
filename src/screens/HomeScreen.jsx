@@ -19,6 +19,7 @@ import RealFileEpubReader from "../components/EnhancedRealFileEpubReader";
 import BookListSection from "../components/BookListSection";
 import AudioListSection from "../components/AudioListSection";
 import AudioPlayerModal from "../components/AudioPlayerModal";
+import AnimatedLoadingComponent from "../components/AnimatedLoadingComponent";
 import { fetchIndividualAudio, requestAudioLicense } from "../services/audios";
 import { generateRsaKeyPair } from "../utils/rsaEncrypt";
 import { decryptAES256GCM } from "../utils/decrypt";
@@ -110,14 +111,12 @@ export default function HomeScreen({ navigation }) {
           onClose={closeAudioModal}
         />
 
-        {audioLoading && (
-          <View style={styles.loadingOverlay}>
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#4B0082" />
-              <Text style={styles.loadingText}>Loading ...</Text>
-            </View>
-          </View>
-        )}
+        <AnimatedLoadingComponent
+          visible={audioLoading}
+          loadingText="Loading audio..."
+          subText="🎵 Preparing your audio experience"
+          backgroundColor="rgba(255, 255, 255, 1)"
+        />
       </SafeAreaView>
   );
 }
@@ -146,27 +145,5 @@ const styles = StyleSheet.create({
     fontSize: 16, 
     color: "#7f8c8d", 
     textAlign: "center" 
-  },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  loadingContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#6b7280',
   },
 });

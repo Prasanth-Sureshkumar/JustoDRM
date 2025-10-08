@@ -7,7 +7,8 @@ import { fetchIndividualBook, requestBookLicense } from "../services/books";
 import { saveDecryptedEpub } from "../utils/saveFilesLocally";
 import { API_BASE_URL, ENCRYPTION_KEY } from "@env";
 import WebViewEpubReader from "./EpubReader";
-import {decryptConcatenatedAES256GCM} from "../utils/decryptText"
+import {decryptConcatenatedAES256GCM} from "../utils/decryptText";
+import AnimatedLoadingComponent from "../components/AnimatedLoadingComponent";
 
 
 
@@ -53,9 +54,13 @@ export default function BookReader({ route }) {
 
   if (loading) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#4B0082" />
-        <Text style={{ marginTop: 8 }}>Decrypting and loading book...</Text>
+      <View style={styles.container}>
+        <AnimatedLoadingComponent
+          visible={loading}
+          loadingText="Decrypting book..."
+          subText="📚 Preparing your reading experience"
+          backgroundColor="rgba(248, 250, 252, 1)"
+        />
       </View>
     );
   }

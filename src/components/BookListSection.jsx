@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { fetchAllBooks } from "../services/books";
+import { ShimmerLoader } from "./ShimmerLoader";
 
 export default function BookListSection({ navigation, maxItems = 5 }) {
   const [books, setBooks] = useState([]);
@@ -50,10 +51,45 @@ export default function BookListSection({ navigation, maxItems = 5 }) {
     </TouchableOpacity>
   );
 
+  const renderShimmerItem = () => (
+    <View style={styles.shimmerItem}>
+      <ShimmerLoader 
+        width={104} 
+        height={140} 
+        borderRadius={6} 
+        style={styles.shimmerImage}
+      />
+      <ShimmerLoader 
+        width="85%" 
+        height={12} 
+        borderRadius={4}
+        style={styles.shimmerTitle}
+      />
+      <ShimmerLoader 
+        width="70%" 
+        height={10} 
+        borderRadius={4}
+        style={styles.shimmerAuthor}
+      />
+    </View>
+  );
+
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4B0082" />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.sectionTitle}>📚 Books</Text>
+          <TouchableOpacity style={styles.seeAllButton} disabled>
+            <Text style={[styles.seeAllText, { opacity: 0.5 }]}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.shimmerContainer}>
+          {Array.from({ length: maxItems }).map((_, index) => (
+            <View key={index}>
+              {renderShimmerItem()}
+            </View>
+          ))}
+        </View>
       </View>
     );
   }
@@ -136,5 +172,25 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 10,
     color: "#6b7280",
+  },
+  shimmerContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+  },
+  shimmerItem: {
+    width: 120,
+    marginRight: 12,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 8,
+  },
+  shimmerImage: {
+    marginBottom: 8,
+  },
+  shimmerTitle: {
+    marginBottom: 6,
+  },
+  shimmerAuthor: {
+    marginBottom: 4,
   },
 });

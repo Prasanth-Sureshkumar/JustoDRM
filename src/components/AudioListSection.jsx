@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { fetchAllAudios } from "../services/audios";
+import { ShimmerLoader } from "./ShimmerLoader";
 
 export default function AudioListSection({ navigation, maxItems = 5, onAudioPress }) {
   const [audios, setAudios] = useState([]);
@@ -56,10 +56,47 @@ export default function AudioListSection({ navigation, maxItems = 5, onAudioPres
     </TouchableOpacity>
   );
 
+  const renderShimmerItem = () => (
+    <View style={styles.shimmerItem}>
+      <View style={styles.shimmerImageContainer}>
+        <ShimmerLoader 
+          width={104} 
+          height={140} 
+          borderRadius={6} 
+          style={styles.shimmerImage}
+        />
+      </View>
+      <ShimmerLoader 
+        width="85%" 
+        height={12} 
+        borderRadius={4}
+        style={styles.shimmerTitle}
+      />
+      <ShimmerLoader 
+        width="70%" 
+        height={10} 
+        borderRadius={4}
+        style={styles.shimmerAuthor}
+      />
+    </View>
+  );
+
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4B0082" />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.sectionTitle}>🎵 Audio Books</Text>
+          <TouchableOpacity style={styles.seeAllButton} disabled>
+            <Text style={[styles.seeAllText, { opacity: 0.5 }]}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.shimmerContainer}>
+          {Array.from({ length: maxItems }).map((_, index) => (
+            <View key={index}>
+              {renderShimmerItem()}
+            </View>
+          ))}
+        </View>
       </View>
     );
   }
@@ -108,11 +145,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#010f29",
     fontWeight: "600",
-  },
-  loadingContainer: {
-    height: 200,
-    justifyContent: "center",
-    alignItems: "center",
   },
   listContainer: {
     paddingHorizontal: 16,
@@ -167,5 +199,29 @@ const styles = StyleSheet.create({
   duration: {
     fontSize: 9,
     color: "#9ca3af",
+  },
+  shimmerContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+  },
+  shimmerItem: {
+    width: 120,
+    marginRight: 12,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 8,
+  },
+  shimmerImageContainer: {
+    position: "relative",
+    marginBottom: 8,
+  },
+  shimmerImage: {
+    marginBottom: 8,
+  },
+  shimmerTitle: {
+    marginBottom: 6,
+  },
+  shimmerAuthor: {
+    marginBottom: 4,
   },
 });
