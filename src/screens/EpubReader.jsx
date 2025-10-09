@@ -47,16 +47,37 @@ const WebViewEpubReader = ({ base64Epub }) => {
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: #ffffff !important;
-            overflow: hidden;
             width: 100%;
-            height: 100%;
+            height: 100vh;
+            overflow: hidden;
         }
         #viewer {
             width: 100%;
             height: 100vh;
             background: #ffffff !important;
-            display: none;
             position: relative;
+        }
+        #nav-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            pointer-events: none;
+        }
+        .nav-section {
+            flex: 1;
+            height: 100%;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        .prev-section {
+            left: 0;
+        }
+        .next-section {
+            right: 0;
         }
         #loader {
             display: flex;
@@ -333,18 +354,24 @@ const WebViewEpubReader = ({ base64Epub }) => {
         }
 
         function navigatePrev() {
-            // For continuous scrolling, scroll up by viewport height
-            const viewer = document.getElementById('viewer');
-            if (viewer) {
-                viewer.scrollTop -= window.innerHeight * 0.8;
+            if (rendition) {
+                console.log('Navigating to previous page');
+                rendition.prev().then(() => {
+                    updateNavigationInfo();
+                }).catch(err => {
+                    console.log('Cannot go to previous page:', err);
+                });
             }
         }
 
         function navigateNext() {
-            // For continuous scrolling, scroll down by viewport height
-            const viewer = document.getElementById('viewer');
-            if (viewer) {
-                viewer.scrollTop += window.innerHeight * 0.8;
+            if (rendition) {
+                console.log('Navigating to next page');
+                rendition.next().then(() => {
+                    updateNavigationInfo();
+                }).catch(err => {
+                    console.log('Cannot go to next page:', err);
+                });
             }
         }
 
@@ -450,14 +477,11 @@ const WebViewEpubReader = ({ base64Epub }) => {
                     
                     console.log('Spine items count:', spineItems.length);
                     
-                    // Render with continuous vertical flow
                     rendition = book.renderTo("viewer", {
                         width: "100%",
                         height: "100%",
-                        spread: "none",
-                        flow: "scrolled-continuous", // Continuous vertical scrolling
-                        manager: "continuous"
-                    });
+                        spread: "none"
+                        });
                     
                     // Apply custom styles to ensure content is visible
                     rendition.hooks.content.register(function(contents) {
@@ -567,6 +591,14 @@ const WebViewEpubReader = ({ base64Epub }) => {
                     rendition.on('displayed', function() {
                         console.log('Content displayed');
                         updateNavigationInfo();
+                    });
+                    
+                    document.addEventListener('keydown', function(event) {
+                        if (event.key === 'ArrowLeft') {
+                            navigatePrev();
+                        } else if (event.key === 'ArrowRight') {
+                            navigateNext();
+                        }
                     });
                     
                     // Display the first section
@@ -765,6 +797,10 @@ const WebViewEpubReader = ({ base64Epub }) => {
 
       {isLoaded && (
         <View style={styles.navigationContainer}>
+          <TouchableOpacity style={styles.navButton} onPress={navigatePrev}>
+            <Text style={styles.navButtonText}>Previous</Text>
+          </TouchableOpacity>
+          
           <View style={styles.pageInfoContainer}>
             <Text style={styles.pageInfo}>
               Section {currentPage} of {totalPages}
@@ -775,10 +811,12 @@ const WebViewEpubReader = ({ base64Epub }) => {
               </Text>
             )}
           </View>
+          
+          <TouchableOpacity style={styles.navButton} onPress={navigateNext}>
+            <Text style={styles.navButtonText}>Next</Text>
+          </TouchableOpacity>
         </View>
       )}
-
-
 
       {isLoading && (
         <View style={styles.loadingOverlay}>
@@ -826,7 +864,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff',
     padding:10,
-    // backgroundColor:'pink'
   },
   headerContainer: {
     padding: 10,
@@ -858,7 +895,7 @@ const styles = StyleSheet.create({
   navButton: {
     paddingHorizontal: 15,
     paddingVertical: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#010f29da",
     borderRadius: 8,
     minWidth: 100,
     alignItems: 'center',
