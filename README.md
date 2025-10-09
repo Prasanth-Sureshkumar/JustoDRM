@@ -4,6 +4,64 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
+# Security Features
+
+## Screenshot Prevention
+
+This app implements screenshot prevention to protect sensitive content from being captured.
+
+### Implementation
+
+Screenshot prevention is implemented using the `FLAG_SECURE` window flag in the `MainActivity.kt` file.
+
+This flag prevents users from:
+- Taking screenshots of the app
+- Recording the screen while the app is visible
+- Viewing the app content in the recent apps overview
+
+The implementation is applied in the `onCreate()` method to ensure protection is active from app launch.
+
+
+## Encryption & Decryption
+
+### Dependencies
+
+- **react-native-quick-crypto**: High-performance cryptographic operations for React Native
+
+### Supported Content Types
+
+The encryption system supports multiple digital content formats:
+- **EPUB Books**: Digital publications with full content protection
+- **MP3 Audio Files**: Audio content with secure streaming capabilities
+
+### Implementation Architecture
+
+#### Client-Side Decryption
+- Encrypted content is received and stored securely on the client device
+- Decryption occurs in real-time during content consumption
+- Decrypted content is never stored permanently on the device
+
+#### Content Protection Features
+
+- **Dynamic Watermarking**: Customizable watermarks overlaid on book content to prevent unauthorized redistribution
+- **Text Selection Prevention**: Disables text selection, copying, and cut operations
+- **Context Menu Blocking**: Prevents right-click context menus and copy operations
+- **Keyboard Shortcut Blocking**: Disables common copy shortcuts (Ctrl+C, Ctrl+A, etc.)
+- **Print Protection**: Blocks printing functionality to prevent physical copies
+
+
+#### Security Measures
+
+1. **Device Security**
+   - Screenshot prevention at the OS level
+   - Screen recording detection and blocking
+
+2. **Anti-Piracy Features**
+   - Watermarking with user identification
+   - Copy protection mechanisms
+
+# Getting Started with Development
+
 ## Step 1: Start Metro
 
 First, you will need to run **Metro**, the JavaScript build tool for React Native.

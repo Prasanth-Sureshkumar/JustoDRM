@@ -57,7 +57,7 @@ export default function BookReader({ route }) {
       <View style={styles.container}>
         <AnimatedLoadingComponent
           visible={loading}
-          loadingText="Decrypting book..."
+          loadingText="Loading book..."
           subText="📚 Preparing your reading experience"
           backgroundColor="rgba(248, 250, 252, 1)"
         />
